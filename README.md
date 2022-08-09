@@ -7,7 +7,7 @@
 - [Usage](#Usage)
 - [Input & Data Types](#InputDataTypes)
 - [Valid Input](#ValidInput)
-- [Examples](#Examples)
+- [Example](#Example)
 - [Errors](#Errors)
 
 ## About

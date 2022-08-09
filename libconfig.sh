@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-#git <libconfig/config.sh/4e98d1d>
+#git <libconfig/libconfig.sh/71d1f18>
 
 config() {
 	# init local variables
