@@ -82,14 +82,17 @@ MY_BOOL=false
 ```
 The latest version will be used, `MY_BOOL=false`
 
-All quote characters `"` and `'` will be stripped before parsing, so a config file can use them or not.  
-Empty spaces will also be stripped:
+Note:
+* Empty spaces will be stripped
+* Variables with `dashes` will be defined with underscores due to Bash limitations: `$MY-BOOL` -> `$MY_BOOL` 
+* Quote characters `"` and `'` will be stripped before parsing, so a config file can use them or not
 ```bash
 MY_BOOL="true"
 MY_BOOL='true '
+MY-BOOL=true
 MY_BOOL=true
 ```
-These all work.
+These will all be parsed and defined as `MY_BOOL=true`
 
 ---
 

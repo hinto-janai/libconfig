@@ -58,7 +58,7 @@ config::source() {
 					if [[ $LIBCONFIG_LINE = \#* ]]; then
 						continue
 					elif [[ $LIBCONFIG_LINE =~ ^${2}=[0-9.]+'.'[0-9]+$ ]]; then
-						declare -g ${2}="${LIBCONFIG_LINE/*=/}" || return 7
+						declare -g ${2//-/_}="${LIBCONFIG_LINE/*=/}" || return 7
 					fi
 				done
 				shift 2;;
@@ -67,7 +67,7 @@ config::source() {
 					if [[ $LIBCONFIG_LINE = \#* ]]; then
 						continue
 					elif [[ $LIBCONFIG_LINE =~ ^${2}=[0-9]+$ ]]; then
-						declare -g ${2}="${LIBCONFIG_LINE/*=/}" || return 7
+						declare -g ${2//-/_}="${LIBCONFIG_LINE/*=/}" || return 7
 					fi
 				done
 				shift 2;;
@@ -76,7 +76,7 @@ config::source() {
 					if [[ $LIBCONFIG_LINE = \#* ]]; then
 						continue
 					elif [[ $LIBCONFIG_LINE =~ ^${2}=[0-9:.]+'.'[0-9]':'[0-9]+$ ]]; then
-						declare -g ${2}="${LIBCONFIG_LINE/*=/}" || return 7
+						declare -g ${2//-/_}="${LIBCONFIG_LINE/*=/}" || return 7
 					fi
 				done
 				shift 2;;
@@ -85,7 +85,7 @@ config::source() {
 					if [[ $LIBCONFIG_LINE = \#* ]]; then
 						continue
 					elif [[ $LIBCONFIG_LINE =~ ^${2}=true$ || $LIBCONFIG_LINE =~ ^${2}=false$ ]]; then
-						declare -g ${2}="${LIBCONFIG_LINE/*=/}" || return 7
+						declare -g ${2//-/_}="${LIBCONFIG_LINE/*=/}" || return 7
 					fi
 				done
 				shift 2;;
@@ -94,7 +94,7 @@ config::source() {
 					if [[ $LIBCONFIG_LINE = \#* ]]; then
 						continue
 					elif [[ $LIBCONFIG_LINE =~ ^${2}=[[:alnum:]._-]+$ ]]; then
-						declare -g ${2}="${LIBCONFIG_LINE/*=/}" || return 7
+						declare -g ${2//-/_}="${LIBCONFIG_LINE/*=/}" || return 7
 					fi
 				done
 				shift 2;;
@@ -103,7 +103,7 @@ config::source() {
 					if [[ $LIBCONFIG_LINE = \#* ]]; then
 						continue
 					elif [[ $LIBCONFIG_LINE =~ ^${2}=[[:alnum:]./_-]+$ ]]; then
-						declare -g ${2}="${LIBCONFIG_LINE/*=/}" || return 7
+						declare -g ${2//-/_}="${LIBCONFIG_LINE/*=/}" || return 7
 					fi
 				done
 				shift 2;;
