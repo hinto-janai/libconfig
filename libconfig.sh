@@ -1,4 +1,4 @@
-# libconfig
+# libconfig.sh
 #
 # Copyright (c) 2022 hinto.janaiyo <https://github.com/hinto-janaiyo>
 #
@@ -20,9 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-#git <libconfig/libconfig.sh/71d1f18>
+#git <libconfig/libconfig.sh/99dc038>
 
-config() {
+config::source() {
 	# init local variables
 	local LIBCONFIG_LINE LIBCONFIG_ARG LIBCONFIG_TYPE IFS=$'\n' || return 1
 	declare -a LIBCONFIG_ARRAY || return 1
@@ -32,7 +32,7 @@ config() {
 
 	# check for odd/even arguments
 	LIBCONFIG_ARG=$(($# % 2))
-	[[ $LIBCONFIG_ART = 0 ]] && return 3
+	[[ $LIBCONFIG_ARG = 0 ]] && return 3
 
 	# check if config is a file
 	[[ -f "$1" ]] || return 4
@@ -109,4 +109,37 @@ config() {
 				shift 2;;
 		esac
 	done
+}
+
+config::carry() {
+	# init local variables.
+	local i || return 1
+	local -a LIBCONFIG_OLD LIBCONFIG_CMD || return 2
+
+	# check amount of arguments
+	case $# in
+		2) :;;
+		*) return 3
+	esac
+
+	# check if file
+	[[ -f $1 ]] || return 3
+	[[ -f $2 ]] || return 4
+
+	# check for read permission
+	[[ -r $1 ]] || return 5
+	[[ -r $2 ]] || return 6
+
+	# get old values from (a) in memory
+	LIBCONFIG_OLD=($(sed "/^#.*/d; /^$/d; s@/@\\\/@g; s/'//g; s/\"//g; s/\[/\\\[/g; s/\]/\\\]/g" "$1" | grep "^.*=.*$")) || return 7
+
+	# create the find/replace argument in one
+	# line instead of invoking sed every loop
+	for i in ${LIBCONFIG_OLD[@]}; do
+		LIBCONFIG_CMD+=("-e s/^${i/=*/=}.*$/${i}/g")
+	done
+
+	# invoke sed once, with the long argument we just created
+	LIBCONFIG_CMD=(sed "${LIBCONFIG_CMD[@]}" "$2")
+	"${LIBCONFIG_CMD[@]}"
 }
