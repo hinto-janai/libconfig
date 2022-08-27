@@ -22,96 +22,170 @@
 
 #git <libconfig/libconfig.sh/99dc038>
 
-config::source() {
+config::grep() (
 	# init local variables
-	local LIBCONFIG_LINE LIBCONFIG_ARG LIBCONFIG_TYPE IFS=$'\n' || return 1
-	declare -a LIBCONFIG_ARRAY || return 1
+	local i LIBCONFIG_FILE LIBCONFIG_ARG LIBCONFIG_OUTPUT_TYPE LIBCONFIG_OUTPUT_MOD IFS=$'\n' || return 1
+	declare -a LIBCONFIG_ARRAY LIBCONFIG_OUTPUT || return 1
 
 	# check for correct arguments
 	[[ $# -lt 3 ]] && return 2
 
-	# check for odd/even arguments
-	LIBCONFIG_ARG=$(($# % 2))
-	[[ $LIBCONFIG_ARG = 0 ]] && return 3
+	# parse args
+	case $1 in
+		--prefix=*|--map=*)
+			# check for even arguments
+			LIBCONFIG_ARG=$(($# % 2))
+			[[ $LIBCONFIG_ARG = 0 ]] || return 3
+			LIBCONFIG_OUTPUT_TYPE="$1"
+			LIBCONFIG_FILE="$2"
+			shift 2
+			;;
+		*)
+			# check for odd arguments
+			LIBCONFIG_ARG=$(($# % 2))
+			[[ $LIBCONFIG_ARG = 1 ]] || return 3
+			LIBCONFIG_FILE="$1"
+			shift 1
+			;;
+	esac
 
 	# check if config is a file
-	[[ -f "$1" ]] || return 4
+	[[ -f $LIBCONFIG_FILE ]] || return 4
 	# check for read permission
-	[[ -r "$1" ]] || return 5
+	[[ -r $LIBCONFIG_FILE ]] || return 5
 
 	# create line array of file
-	mapfile LIBCONFIG_ARRAY < "$1" || return 6
-	# convert to string
-	printf -v LIBCONFIG_ARRAY "%s" "${LIBCONFIG_ARRAY[@]}"
-	# shift config file
-	shift
+	mapfile LIBCONFIG_ARRAY < "$LIBCONFIG_FILE" || return 6
 	# strip quotes
-	LIBCONFIG_ARRAY=${LIBCONFIG_ARRAY//\"}
-	LIBCONFIG_ARRAY=${LIBCONFIG_ARRAY//\'}
+	LIBCONFIG_ARRAY=(${LIBCONFIG_ARRAY[@]//\"})
+	LIBCONFIG_ARRAY=(${LIBCONFIG_ARRAY[@]//\'})
+
+	# determine output type
+	case $LIBCONFIG_OUTPUT_TYPE in
+		--map=*)    LIBCONFIG_OUTPUT_MOD="${LIBCONFIG_OUTPUT_TYPE/*=}"; LIBCONFIG_OUTPUT_TYPE=map;;
+		--prefix=*) LIBCONFIG_OUTPUT_MOD="${LIBCONFIG_OUTPUT_TYPE/*=}"; LIBCONFIG_OUTPUT_TYPE=prefix;;
+	esac
 
 	# loop over arguments
 	until [[ $# = 0 ]]; do
 		# loop over file per argument given
 		case $1 in
 			ip)
-				for LIBCONFIG_LINE in $LIBCONFIG_ARRAY; do
-					if [[ $LIBCONFIG_LINE = \#* ]]; then
+				for i in ${LIBCONFIG_ARRAY[@]}; do
+					if [[ $i != ${2}* ]]; then
 						continue
-					elif [[ $LIBCONFIG_LINE =~ ^${2}=[0-9.]+'.'[0-9]+$ ]]; then
-						declare -g ${2//-/_}="${LIBCONFIG_LINE/*=/}" || return 7
-					fi
-				done
-				shift 2;;
-			int)
-				for LIBCONFIG_LINE in $LIBCONFIG_ARRAY; do
-					if [[ $LIBCONFIG_LINE = \#* ]]; then
-						continue
-					elif [[ $LIBCONFIG_LINE =~ ^${2}=[0-9]+$ ]]; then
-						declare -g ${2//-/_}="${LIBCONFIG_LINE/*=/}" || return 7
+					elif [[ $i =~ ^${2}=[[:alnum:].]+'.'[[:alnum:]]+$ ]]; then
+						LIBCONFIG_OUTPUT+=("${2//-/_}=${i/*=/}")
 					fi
 				done
 				shift 2;;
 			port)
-				for LIBCONFIG_LINE in $LIBCONFIG_ARRAY; do
-					if [[ $LIBCONFIG_LINE = \#* ]]; then
+				for i in ${LIBCONFIG_ARRAY[@]}; do
+					if [[ $i != ${2}* ]]; then
 						continue
-					elif [[ $LIBCONFIG_LINE =~ ^${2}=[0-9:.]+'.'[0-9]':'[0-9]+$ ]]; then
-						declare -g ${2//-/_}="${LIBCONFIG_LINE/*=/}" || return 7
+					elif [[ $i =~ ^${2}=[[:alnum:].]+'.'[[:alnum:]]+':'[0-9]+$ ]]; then
+						LIBCONFIG_OUTPUT+=("${2//-/_}=${i/*=/}")
+					fi
+				done
+				shift 2;;
+			int)
+				for i in ${LIBCONFIG_ARRAY[@]}; do
+					if [[ $i != ${2}* ]]; then
+						continue
+					elif [[ $i =~ ^${2}=[0-9]+$ || $i =~ ^${2}=-[0-9]+$ ]]; then
+						LIBCONFIG_OUTPUT+=("${2//-/_}=${i/*=/}")
+					fi
+				done
+				shift 2;;
+			pos)
+				for i in ${LIBCONFIG_ARRAY[@]}; do
+					if [[ $i != ${2}* ]]; then
+						continue
+					elif [[ $i =~ ^${2}=[0-9]+$ ]]; then
+						LIBCONFIG_OUTPUT+=("${2//-/_}=${i/*=/}")
+					fi
+				done
+				shift 2;;
+			neg)
+				for i in ${LIBCONFIG_ARRAY[@]}; do
+					if [[ $i != ${2}* ]]; then
+						continue
+					elif [[ $i =~ ^${2}=-[0-9]+$ ]]; then
+						LIBCONFIG_OUTPUT+=("${2//-/_}=${i/*=/}")
 					fi
 				done
 				shift 2;;
 			bool)
-				for LIBCONFIG_LINE in $LIBCONFIG_ARRAY; do
-					if [[ $LIBCONFIG_LINE = \#* ]]; then
+				for i in ${LIBCONFIG_ARRAY[@]}; do
+					if [[ $i != ${2}* ]]; then
 						continue
-					elif [[ $LIBCONFIG_LINE =~ ^${2}=true$ || $LIBCONFIG_LINE =~ ^${2}=false$ ]]; then
-						declare -g ${2//-/_}="${LIBCONFIG_LINE/*=/}" || return 7
+					elif [[ $i =~ ^${2}=true$ || $i =~ ^${2}=false$ ]]; then
+						LIBCONFIG_OUTPUT+=("${2//-/_}=${i/*=/}")
 					fi
 				done
 				shift 2;;
 			char)
-				for LIBCONFIG_LINE in $LIBCONFIG_ARRAY; do
-					if [[ $LIBCONFIG_LINE = \#* ]]; then
+				for i in ${LIBCONFIG_ARRAY[@]}; do
+					if [[ $i != ${2}* ]]; then
 						continue
-					elif [[ $LIBCONFIG_LINE =~ ^${2}=[[:alnum:]._-]+$ ]]; then
-						declare -g ${2//-/_}="${LIBCONFIG_LINE/*=/}" || return 7
+					elif [[ $i =~ ^${2}=[[:alnum:]._-]+$ ]]; then
+						LIBCONFIG_OUTPUT+=("${2//-/_}=${i/*=/}")
 					fi
 				done
 				shift 2;;
 			path)
-				for LIBCONFIG_LINE in $LIBCONFIG_ARRAY; do
-					if [[ $LIBCONFIG_LINE = \#* ]]; then
+				for i in ${LIBCONFIG_ARRAY[@]}; do
+					if [[ $i != ${2}* ]]; then
 						continue
-					elif [[ $LIBCONFIG_LINE =~ ^${2}=[[:alnum:]./_-]+$ ]]; then
-						declare -g ${2//-/_}="${LIBCONFIG_LINE/*=/}" || return 7
+					elif [[ $i =~ ^${2}=[[:alnum:]./_-]+$ ]]; then
+						LIBCONFIG_OUTPUT+=("${2//-/_}=${i/*=/}")
+					fi
+				done
+				shift 2;;
+			proto)
+				for i in ${LIBCONFIG_ARRAY[@]}; do
+					if [[ $i != ${2}* ]]; then
+						continue
+					elif [[ $i =~ ^${2}=[[:alpha:]]+://[[:alnum:]./?=_%:-]+$ || $i =~ ^${2}=[[:alpha:]]+://[[:alnum:]./?=_%:-]+':'[0-9]+$ ]]; then
+						LIBCONFIG_OUTPUT+=("${2//-/_}=${i/*=/}")
+					fi
+				done
+				shift 2;;
+			web)
+				LIBCONFIG_RANGE="$1"
+				for i in ${LIBCONFIG_ARRAY[@]}; do
+					if [[ $i != ${2}* ]]; then
+						continue
+					elif [[ $i =~ ^${2}='http://'[[:alnum:]./?=_%:-]+$ || $i =~ ^${2}='https://'[[:alnum:]./?=_%:-]+$ || $i =~ ^${2}='www.'[[:alnum:]./?=_%:-]+$ ]]; then
+						LIBCONFIG_OUTPUT+=("${2//-/_}=${i/*=/}")
+					fi
+				done
+				shift 2;;
+			\[*\]*)
+				LIBCONFIG_RANGE="$1"
+				for i in ${LIBCONFIG_ARRAY[@]}; do
+					if [[ $i != ${2}* ]]; then
+						continue
+					elif [[ $i =~ ^${2}=${LIBCONFIG_RANGE}$ ]]; then
+						LIBCONFIG_OUTPUT+=("${2//-/_}=${i/*=/}")
 					fi
 				done
 				shift 2;;
 		esac
 	done
-}
 
-config::carry() {
+	# return error on nothing found
+	[[ $LIBCONFIG_OUTPUT ]] || return 7
+
+	# determine output type
+	case $LIBCONFIG_OUTPUT_TYPE in
+		prefix) printf "${LIBCONFIG_OUTPUT_MOD}%s\n" "${LIBCONFIG_OUTPUT[@]}";;
+		map)    printf "${LIBCONFIG_OUTPUT_MOD}[%s\n" "${LIBCONFIG_OUTPUT[@]/=/\]=}";;
+		*)      printf "%s\n" "${LIBCONFIG_OUTPUT[@]}";;
+	esac
+)
+
+config::merge() (
 	# init local variables.
 	local i || return 1
 	local -a LIBCONFIG_OLD LIBCONFIG_CMD || return 2
@@ -142,4 +216,4 @@ config::carry() {
 	# invoke sed once, with the long argument we just created
 	LIBCONFIG_CMD=(sed "${LIBCONFIG_CMD[@]}" "$2")
 	"${LIBCONFIG_CMD[@]}"
-}
+)
