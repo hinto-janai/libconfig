@@ -1,13 +1,11 @@
 # libconfig
->Functions for handling config files in Bash
-
 ## Contents
 - [About](#About)
 - [Speed](#Speed)
 - [Usage](#Input)
 	- [config::grep](#ConfigGrep)
-		- [Data Types](#DataTypes)
-		- [Output Types](#OutputTypes)
+		- [Data Types](#Data-Types)
+		- [Output Types](#Output-Types)
 	- [config::merge](#ConfigCarry)
 - [Example](#Example)
 	- [config::grep](#ConfigGrep-1)
@@ -29,9 +27,9 @@ Despite the name, `config::grep()` does not use `grep`, it is 100% Bash builtins
 
 | lines of text | source time | config::grep time   | config::merge() time |
 |---------------|-------------|---------------------|----------------------|
-| 10            | 0.000s      | 0.001s              | 0.006s
-| 100           | 0.001s      | 0.005s              | 0.020s
-| 1000          | 0.002s      | 0.030s              | 0.200s
+| 10            | 0.000s      | 0.001s              | 0.002s
+| 100           | 0.001s      | 0.005s              | 0.010s
+| 1000          | 0.002s      | 0.030s              | 0.045s
 
 ## Usage
 ### `config::grep()`
@@ -54,7 +52,7 @@ Every 2 pair argument after will be more options you'd like to read from the sam
 | Data Type | Valid Input                                                     | example                             | special exception |
 |-----------|-----------------------------------------------------------------|-------------------------------------|-------------------|
 | ip        | alphanumeric seperated by '.'; must begin/end with alphanumeric | 127.0.0.1, my.domain.com            | localhost         |
-| port      | like ip, but expects a port ':'; must end with integer          | 8080, 22, 123                       | localhost:[port]  |
+| port      | like ip, but expects a port ':'; must end with integer          | 127.0.0.1:8080, my.domain.com:22    | localhost[:port]  |
 | int       | any integer including 0 and negative; no floating point         | 88, 0, -1                           |                   |
 | pos       | postive integer including 0; no floating point                  | 88, 0, 1                            |                   |
 | neg       | negative integer; no floating point                             | -88, -2, -1                         |                   |
@@ -142,7 +140,10 @@ Needs exactly 2 arguments, an old file and a new file.
 ```
 config::merge old.conf new.conf
 ```
-Old values will be carried to the new.conf and the final merged file will be printed to STDOUT.
+Old values will be carried to the new.conf and the final merged file will be printed to STDOUT. If a value contains spaces, it will be carried over to the new file retaining the spaces with `"` surrounding it:
+```
+VARIABLE_WITH_SPACES="this will stay like this"
+```
 
 ## Example
 ### `config::grep()`
@@ -158,10 +159,9 @@ MY_CHAR=sentence with spaces
 sudo rm -rf /*
 ```
 
-The 2 variables that would be sourced out of that file:
+The 1 variable that would be sourced out of that file:
 ```bash
 MY_PATH=/my/path
-MY_CHAR=sentence
 ```
 The rest will be ignored. No code will be executed either, where as `source` here would wipe your root.
 
@@ -173,12 +173,14 @@ Example merging of two config files
 # old config
 # ------------
 OLD_VARIABLE_I_STILL_WANT=value
+VARIABLE_WITH_SPACES="this has spaces"
 ```
 ```bash
 # new config
 # ----------
 SOME_NEW_VARIABLES=
 MORE_NEW_VARIABLES=
+VARIABLE_WITH_SPACE=
 OLD_VARIABLE_I_STILL_WANT=
 ```
 After `config::merge old new`, this will be the output:
@@ -187,6 +189,7 @@ After `config::merge old new`, this will be the output:
 # ----------
 SOME_NEW_VARIABLES=
 MORE_NEW_VARIABLES=
+VARIABLE_WITH_SPACES="this has spaces"
 OLD_VARIABLE_I_STILL_WANT=value
 ```
 
@@ -194,7 +197,7 @@ OLD_VARIABLE_I_STILL_WANT=value
 ### `config::grep()`
 | Exit Code | Reason                                            |
 |-----------|---------------------------------------------------|
-| 1         | error creating local variables for config::grep   |
+| 1         | error creating local variables                    |
 | 2         | less than 3 arguments were given                  |
 | 3         | incorrect amount of arguments (an even number)    |
 | 4         | config provided is not a file                     |
@@ -207,7 +210,7 @@ OLD_VARIABLE_I_STILL_WANT=value
 ### `config::merge()`
 | Exit Code | Reason                                      |
 |-----------|---------------------------------------------|
-| 1/2       | error creating local variables for config() |
+| 1/2       | error creating local variables              |
 | 3         | 2 arguments were not given                  |
 | 4         | $1 file doesn't exist or is not a file      |
 | 5         | $2 file doesn't exist or is not a file      |

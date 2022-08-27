@@ -74,7 +74,7 @@ config::grep() (
 				for i in ${LIBCONFIG_ARRAY[@]}; do
 					if [[ $i != ${2}* ]]; then
 						continue
-					elif [[ $i =~ ^${2}=[[:alnum:].]+'.'[[:alnum:]]+$ ]]; then
+					elif [[ $i =~ ^${2}=localhost$ || $i =~ ^${2}=[[:alnum:].]+'.'[[:alnum:]]+$ ]]; then
 						LIBCONFIG_OUTPUT+=("${2//-/_}=${i/*=/}")
 					fi
 				done
@@ -83,7 +83,7 @@ config::grep() (
 				for i in ${LIBCONFIG_ARRAY[@]}; do
 					if [[ $i != ${2}* ]]; then
 						continue
-					elif [[ $i =~ ^${2}=[[:alnum:].]+'.'[[:alnum:]]+':'[0-9]+$ ]]; then
+					elif [[ $i =~ ^${2}=localhost':'[0-9]+$ || $i =~ ^${2}=[[:alnum:].]+'.'[[:alnum:]]+':'[0-9]+$ ]]; then
 						LIBCONFIG_OUTPUT+=("${2//-/_}=${i/*=/}")
 					fi
 				done
@@ -187,7 +187,7 @@ config::grep() (
 
 config::merge() (
 	# init local variables.
-	local i || return 1
+	local i IFS=$'\n' || return 1
 	local -a LIBCONFIG_OLD LIBCONFIG_CMD || return 2
 
 	# check amount of arguments
@@ -210,7 +210,11 @@ config::merge() (
 	# create the find/replace argument in one
 	# line instead of invoking sed every loop
 	for i in ${LIBCONFIG_OLD[@]}; do
-		LIBCONFIG_CMD+=("-e s/^${i/=*/=}.*$/${i}/g")
+		if [[ $i = *' '* ]]; then
+			LIBCONFIG_CMD+=("-e s/^${i/=*}.*$/${i/=*/=}\"${i/*=}\"/g")
+		else
+			LIBCONFIG_CMD+=("-e s/^${i/=*/=}.*$/${i}/g")
+		fi
 	done
 
 	# invoke sed once, with the long argument we just created
