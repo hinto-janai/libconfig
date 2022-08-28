@@ -49,19 +49,19 @@ The order of the `CONFIG_PATH` & `OUTPUT_TYPE` don't matter, but the `DATA_TYPE`
 Every 2 pair argument after will be more options you'd like to read from the same config file.
 
 ### Data Types
-| Data Type | Valid Input                                                     | example                             | special exception |
-|-----------|-----------------------------------------------------------------|-------------------------------------|-------------------|
-| ip        | alphanumeric seperated by '.'; must begin/end with alphanumeric | 127.0.0.1, my.domain.com            | localhost         |
-| port      | like ip, but expects a port ':'; must end with integer          | 127.0.0.1:8080, my.domain.com:22    | localhost[:port]  |
-| int       | any integer including 0 and negative; no floating point         | 88, 0, -1                           |                   |
-| pos       | postive integer including 0; no floating point                  | 88, 0, 1                            |                   |
-| neg       | negative integer; no floating point                             | -88, -2, -1                         |                   |
-| bool      | true/false                                                      | true, false                         |                   |
-| char      | alphanumeric and some extra characters                          | hi, hi_all, h1.every-one            |                   |
-| path      | alphanumeric seperated by '/'; no spaces, must be full path     | /home/hinto                         |                   |
-| proto     | protocol followed by '://ip' (and optionally a port)            | ssh://site.com:22, smb://127.88:137 |                   |
-| web       | like protocol, but only for http, https, www                    | https://site.com/search?query=...   |                   |
-| [...]     | custom regex range                                              | [0-9], [a-z], [1-3]+, [A-Z]+        |                   |
+| Data Type   | Valid Input                                                     | example                              | special exception |
+|-------------|-----------------------------------------------------------------|--------------------------------------|-------------------|
+| ip          | alphanumeric seperated by '.'; must begin/end with alphanumeric | 127.0.0.1, my.domain.com             | localhost         |
+| port        | like ip, but expects a port ':'; must end with integer          | 127.0.0.1:8080, my.domain.com:22     | localhost[:port]  |
+| int         | any integer including 0 and negative; no floating point         | 88, 0, -1                            |                   |
+| pos         | postive integer including 0; no floating point                  | 88, 0, 1                             |                   |
+| neg         | negative integer; no floating point                             | -88, -2, -1                          |                   |
+| bool        | true/false                                                      | true, false                          |                   |
+| char        | alphanumeric and some extra characters                          | hi, hi_all, h1.every-one             |                   |
+| path        | alphanumeric seperated by '/'; no spaces, must be full path     | /home/hinto                          |                   |
+| proto       | protocol followed by '://ip' (and optionally a port)            | ssh://site.com:22, smb://127.88:137  |                   |
+| web         | like protocol, but only for http, https, www                    | https://site.com/search?query=...    |                   |
+| [...] (...) | custom regex range; parenthesis must be quoted: '(...)'         | [0-9], [A-Z]+, '([1-3]\|[7-9])'      |                   |
 
 ### Output Types
 | Output Type | Command Flag   | Behavior                                                                       | Example                                   |

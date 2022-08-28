@@ -152,7 +152,6 @@ config::grep() (
 				done
 				shift 2;;
 			web)
-				LIBCONFIG_RANGE="$1"
 				for i in ${LIBCONFIG_ARRAY[@]}; do
 					if [[ $i != ${2}* ]]; then
 						continue
@@ -161,7 +160,7 @@ config::grep() (
 					fi
 				done
 				shift 2;;
-			\[*\]*)
+			\[*\]*|\(*\)*)
 				LIBCONFIG_RANGE="$1"
 				for i in ${LIBCONFIG_ARRAY[@]}; do
 					if [[ $i != ${2}* ]]; then
