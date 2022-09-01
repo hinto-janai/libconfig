@@ -17,7 +17,7 @@
 ## About
 These functions handle common config file operations in Bash.
 
-| function           | purpose | dependency |
+| Function           | Purpose | Dependency |
 |--------------------|---------|------------|
 | `config::grep()`   | Parses and prints values from a text file without executing the code from the file itself, like the unsafe `source` does | `Bash v4.4+` |
 | `config::merge()`  | Carrys old variable values from one file to another and prints the merged config file to STDOUT | `sed`, `grep` |
@@ -25,7 +25,7 @@ These functions handle common config file operations in Bash.
 ## Speed
 Despite the name, `config::grep()` does not use `grep`, it is 100% Bash builtins.
 
-| lines of text | source time | config::grep time   | config::merge() time |
+| Lines of Text | Source Time | config::grep() Time | config::merge() Time |
 |---------------|-------------|---------------------|----------------------|
 | 10            | 0.000s      | 0.001s              | 0.002s
 | 100           | 0.001s      | 0.005s              | 0.010s
@@ -49,7 +49,7 @@ The order of the `CONFIG_PATH` & `OUTPUT_TYPE` don't matter, but the `DATA_TYPE`
 Every 2 pair argument after will be more options you'd like to read from the same config file.
 
 ### Data Types
-| Data Type   | Valid Input                                                     | example                              | special exception |
+| Data Type   | Valid Input                                                     | Example                              | Special Exception |
 |-------------|-----------------------------------------------------------------|--------------------------------------|-------------------|
 | ip          | alphanumeric seperated by '.'; must begin/end with alphanumeric | 127.0.0.1, my.domain.com             | localhost         |
 | port        | like ip, but expects a port ':'; must end with integer          | 127.0.0.1:8080, my.domain.com:22     | localhost[:port]  |
@@ -122,9 +122,9 @@ declare -Ag $(config::grep --map=array /my/config \
 )
 
 # source locally
-local -A $(config::grep --prefix=hello_ /my/config \
-		bool MY_BOOL \
-		char MY_CHAR
+local -A $(config::grep --map=array /my/config \
+	bool MY_BOOL \
+	char MY_CHAR
 )
 ```
 This will define a mapped array called `array` with the key values as the OPTIONS:
@@ -203,7 +203,8 @@ OLD_VARIABLE_I_STILL_WANT=value
 | 4         | config provided is not a file                     |
 | 5         | do not have permission to read config file        |
 | 6         | error reading from the file                       |
-| 7         | no matches found                                  |
+| 7         | invalid data type given                           |
+| 8         | no matches found                                  |
 
 ---
 
